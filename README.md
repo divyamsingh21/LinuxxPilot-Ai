@@ -1,6 +1,4 @@
-﻿<div align="center">
-
-# ðŸ§ LinuxPilot AI
+# LinuxPilot AI
 
 **A local, safety-first AI-powered Linux operations assistant and intelligent system copilot.**
 
@@ -13,133 +11,130 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-55%20passed-brightgreen?style=flat-square&logo=pytest)](tests/)
 
-<br/>
+---
 
-> LinuxPilot AI is not a generic chat wrapper around a shell. It is an **intelligent, safety-first Linux operations agent** â€” a deterministic pipeline that classifies intent, generates task plans, collects real system metrics, validates commands through a **3-tier safety layer**, and synthesizes structured, actionable insights in milliseconds.
-
-<br/>
-
-[ðŸš€ Quick Start](#-quick-start-for-linux) Â· [ðŸ“– API Reference](#-api-reference) Â· [ðŸ›¡ï¸ Safety Layer](#-3-tier-command-safety-layer) Â· [âš¡ Performance](#-performance--benchmarks) Â· [ðŸ§ª Tests](#-running-tests)
-
-</div>
+> LinuxPilot AI is not a generic chat wrapper around a shell. It is an **intelligent, safety-first Linux operations agent** -- a deterministic pipeline that classifies user intent, generates execution plans, collects real-time system metrics, validates commands through a **3-tier safety layer**, and synthesizes structured, actionable responses in milliseconds.
 
 ---
 
-## ðŸ—ï¸ Architecture Overview
+## Table of Contents
 
+- [Architecture Overview](#architecture-overview)
+- [Key Features](#key-features)
+- [Performance & Benchmarks](#performance--benchmarks)
+- [3-Tier Command Safety Layer](#3-tier-command-safety-layer)
+- [Quick Start for Linux](#quick-start-for-linux)
+- [Windows Development & Testing](#windows-development--testing)
+- [Project Directory Structure](#project-directory-structure)
+- [API Reference](#api-reference)
+- [Running Tests](#running-tests)
+- [Docker Support](#docker-support)
+- [Environment Configuration](#environment-configuration)
+- [Demo Queries](#demo-queries)
+- [Tech Stack](#tech-stack)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Architecture Overview
+
+Conventional terminal AI tools send raw prompts to an LLM and run unvetted shell commands directly -- a dangerous and unpredictable approach.
+
+LinuxPilot AI introduces a **deterministic, multi-stage safety pipeline**:
+
+```mermaid
+flowchart TD
+    A[User Natural Language Query] --> B[Intent Classifier\nDeterministic Fast-Path + Qwen 2.5 Fallback]
+    B --> C[Task Planner\nDeterministic & Contextual Workflows]
+    C --> D[Tool Registry\npsutil | os.scandir | systemctl | journalctl]
+    D --> E[3-Tier Command Safety Validator\nREAD_ONLY | MODIFYING | DANGEROUS]
+    E --> F[Structured Execution & Response Synthesis]
+    F --> G[React 18 + TypeScript Dashboard UI]
 ```
-Conventional AI Terminals:   User Prompt â”€â”€â–º LLM â”€â”€â–º Raw Shell Execution   âŒ Dangerous & Unpredictable
 
-LinuxPilot AI Pipeline:
-
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚                  User Natural Language Query                    â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚  Intent Classifier (Deterministic Fast-Path + Qwen 2.5 Fallback)â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚         Task Planner  (Deterministic & Contextual Workflows)    â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚     Tool Registry  (psutil Â· os.scandir Â· systemctl Â· etc.)    â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚      3-Tier Command Safety Validator                            â”‚
-  â”‚      READ_ONLY â”€â”€â–º MODIFYING â”€â”€â–º DANGEROUS                     â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚         Structured Execution & Response Synthesis               â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚         React 18 + TypeScript Dashboard UI                      â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```text
+Pipeline Breakdown:
+1. User Query          -> Free-form text describing a task or problem.
+2. Intent Classifier   -> Fast regex/heuristic matcher (sub-millisecond) with local LLM fallback.
+3. Task Planner        -> Assembles deterministic tool steps and parameter bindings.
+4. Tool Registry       -> Safe Python-native interfaces (psutil, os.scandir, systemctl).
+5. Safety Validator    -> Enforces READ_ONLY (auto-run), MODIFYING (prompt user), or DANGEROUS (block).
+6. Response Synthesizer-> Structures data into readable diagnostics, cards, and tables.
+7. Frontend Dashboard  -> Real-time telemetry, terminal logs, and interactive controls.
 ```
 
 ---
 
-## âœ¨ Key Features
+## Key Features
 
 | Feature | Description |
 |---|---|
-| âš¡ **Instant Diagnostics** | Live CPU, per-core utilization, 1m/5m load averages, RAM & swap, disk, network |
-| ðŸ“‚ **High-Speed File Discovery** | Deep filesystem traversal via `os.scandir`, extension filters, size thresholds |
-| âš™ï¸ **Systemd Service Management** | Safely inspect & control nginx, docker, ssh, apache2, postgresql, mysql |
-| ðŸ“œ **Log Analysis** | Structured `journalctl` & `dmesg` queries with priority filtering |
-| ðŸ’¡ **Linux Concept Tutor** | Instant permission explanations (`chmod 755`), tarball usage, command breakdowns |
-| ðŸ”’ **Local-Only Security** | Backend bound to `127.0.0.1` â€” no unauthorized network access |
-| ðŸ–¥ï¸ **Modern Dashboard** | React 18 + TypeScript + Tailwind: live metrics, pipeline visualization, query history |
-| ðŸ¤– **AI-Powered Fallback** | Qwen 2.5:7B via Ollama for complex or ambiguous queries beyond the fast path |
-| ðŸ§ª **55 Automated Tests** | Full test suite covering API, intent, safety, orchestration, and tools |
+| **Instant Diagnostics** | Live CPU usage, per-core metrics, 1m/5m/15m load averages, RAM & swap, disk capacity, and network status. |
+| **High-Speed File Discovery** | Deep filesystem search powered by `os.scandir` with file extension filtering, directory limits, and size thresholds. |
+| **Systemd Service Management** | Inspect and control critical services (`nginx`, `docker`, `ssh`, `apache2`, `postgresql`, `mysql`) with automated status checks. |
+| **Log Analysis** | Parameterized queries for `journalctl` and `dmesg` with priority filtering (error, warning, info). |
+| **Linux Concept Tutor** | Instant explanation of file permissions (`chmod 755`), tarball commands, exit codes, and shell fundamentals. |
+| **Local-Only Security** | Backend defaults to `127.0.0.1`, keeping all command validation and data processing entirely local on your machine. |
+| **Modern Dashboard** | Built with React 18, TypeScript, and Tailwind CSS. Features live metric graphs, command cards, and execution history. |
+| **Local LLM Fallback** | Uses local Ollama with Qwen 2.5:7B-Instruct for complex, conversational, or ambiguous queries without sending data to the cloud. |
+| **Automated Test Suite** | 55 unit and integration tests covering intent detection, safety gating, planner logic, and tool execution. |
 
 ---
 
-## âš¡ Performance & Benchmarks
+## Performance & Benchmarks
 
-LinuxPilot AI uses a **Deterministic Fast-Path Architecture** that bypasses LLM roundtrips for standard queries, reserving Ollama only for genuinely ambiguous inputs.
+LinuxPilot AI uses a **Deterministic Fast-Path Engine** that resolves common operational queries instantly via local APIs and heuristics, invoking Ollama only when genuine natural-language synthesis is required.
 
-| Query / Operation | Before | After | Speedup |
+| Query / Operation | Conventional LLM Shell | LinuxPilot AI Fast-Path | Speedup |
 |---|---|---|---|
-| `"Why is my computer running slowly?"` | ~45,000 ms | **506 ms** | **89Ã— faster** |
-| `"Find all large files in my home directory"` | ~164,000 ms | **73 ms** | **2,200Ã— faster** |
-| `"Find Python files larger than 50 MB"` | ~120,000 ms | **50 ms** | **2,400Ã— faster** |
-| `"Show me the status of nginx"` | ~30,000 ms | **8 ms** | **3,750Ã— faster** |
-| `"Show recent system errors"` | ~25,000 ms | **16 ms** | **1,560Ã— faster** |
-| `"Explain what chmod 755 means"` | ~15,000 ms | **1 ms** | **15,000Ã— faster** |
-| `"df -h"` (read-only execution) | ~15,000 ms | **10 ms** | **1,500Ã— faster** |
-| `"systemctl restart nginx"` (confirmation gate) | ~20,000 ms | **< 1 ms** | **20,000Ã— faster** |
-| `"rm -rf /"` (blocked by safety engine) | ~10,000 ms | **2 ms** | **5,000Ã— faster** |
+| `"Why is my computer running slowly?"` | ~45,000 ms | **506 ms** | **89x faster** |
+| `"Find all large files in my home directory"` | ~164,000 ms | **73 ms** | **2,200x faster** |
+| `"Find Python files larger than 50 MB"` | ~120,000 ms | **50 ms** | **2,400x faster** |
+| `"Show me the status of nginx"` | ~30,000 ms | **8 ms** | **3,750x faster** |
+| `"Show recent system errors"` | ~25,000 ms | **16 ms** | **1,560x faster** |
+| `"Explain what chmod 755 means"` | ~15,000 ms | **1 ms** | **15,000x faster** |
+| `"df -h"` (read-only execution) | ~15,000 ms | **10 ms** | **1,500x faster** |
+| `"systemctl restart nginx"` (confirmation gate) | ~20,000 ms | **< 1 ms** | **20,000x faster** |
+| `"rm -rf /"` (blocked by safety engine) | ~10,000 ms | **2 ms** | **5,000x faster** |
 
 ---
 
-## ðŸ›¡ï¸ 3-Tier Command Safety Layer
+## 3-Tier Command Safety Layer
 
-Security is the **core architectural foundation** of LinuxPilot AI. Every command passes through a strict 3-tier validation boundary before any execution occurs.
+Safety is the core architectural guarantee of LinuxPilot AI. Every shell command passes through a strict 3-tier validation rule set before execution is permitted:
 
+```text
+                         [ User Request or Agent Command ]
+                                        |
+                          [ Command Validation Layer ]
+                                        |
+      +---------------------------------+---------------------------------+
+      |                                 |                                 |
+      v                                 v                                 v
+[ READ_ONLY ]                    [ MODIFYING ]                     [ DANGEROUS ]
+Non-destructive read commands    State-altering operations         Destructive commands
+(df, free, ps, top, ls,          (systemctl restart, apt           (rm -rf /, mkfs, dd,
+uptime, systemctl status)        install, chmod, chown)            fork bombs, curl | bash)
+      |                                 |                                 |
+      v                                 v                                 v
+ AUTO-EXECUTE                     EXPLICIT CONFIRMATION             PERMANENTLY BLOCKED
+ Instant output                   User prompt required              Zero exceptions
 ```
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚     User Request / Agent Command     â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                       â”‚
-                           Command Validation Layer
-                                       â”‚
-          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-          â–¼                            â–¼                            â–¼
-     [READ_ONLY]                  [MODIFYING]                 [DANGEROUS]
-  Non-destructive              State-altering changes      Catastrophic deletion
-  (df, free, ps, top,         (systemctl restart,          (rm -rf /, mkfs,
-   ls, uptime, status)         apt install, chmod)          fork bombs, curl|bash)
-          â”‚                            â”‚                            â”‚
-          â–¼                            â–¼                            â–¼
-    AUTO-EXECUTE              EXPLICIT USER CONFIRMATION    PERMANENTLY BLOCKED
-   (Instant Output)            REQUIRED before action        (Zero Exceptions)
-```
 
-> **âš ï¸ Safety Guarantee:** Dangerous commands (`rm -rf /`, raw disk overwriting, fork bombs) are blocked **unconditionally**. Passing `confirmed=True` will **never** bypass a `BLOCKED` verdict.
+> **Safety Guarantee:** Catastrophic commands (`rm -rf /`, raw disk writes with `dd`, fork bombs, or unvetted shell pipes) are blocked **unconditionally**. Passing `confirmed=true` will **never** bypass a blocked verdict.
 
 ---
 
-## ðŸš€ Quick Start for Linux
+## Quick Start for Linux
 
 ### Prerequisites
 
-- Linux OS â€” Ubuntu 20.04+ Â· Debian 11+ Â· Fedora 38+ Â· Linux Mint
-- Python 3.10+ & `python3-venv`
-- Node.js 18+ & `npm`
-- Git
-- [Ollama](https://ollama.ai) with `qwen2.5:7b-instruct` pulled *(optional â€” only needed for complex queries)*
+- **Linux Distribution**: Ubuntu 20.04+, Debian 11+, Fedora 38+, Linux Mint, or Arch Linux
+- **Python**: 3.10+ (with `python3-venv`)
+- **Node.js**: 18+ and `npm`
+- **Git**
+- **Ollama** (optional, for local LLM fallback): [https://ollama.ai](https://ollama.ai) with `qwen2.5:7b-instruct`
 
 ### 1. Clone the Repository
 
@@ -148,60 +143,69 @@ git clone https://github.com/divyamsingh21/LinuxPilot-Ai.git
 cd LinuxPilot-Ai
 ```
 
-### 2. One-Command Automated Install
+### 2. Run the Automated Installer
+
+The installer configures the Python virtual environment, installs backend dependencies, builds frontend packages, and initializes the local database.
 
 ```bash
 chmod +x scripts/install.sh
 ./scripts/install.sh
 ```
 
-The installer automatically:
-1. âœ… Verifies Python 3.10+ and Node.js 18+
-2. âœ… Creates a clean `.venv/` virtual environment
-3. âœ… Installs all backend dependencies (`requirements.txt`)
-4. âœ… Installs frontend npm packages
-5. âœ… Initializes the SQLite database schema
-
-### 3. Configure Environment
+### 3. Configure the Environment
 
 ```bash
 cp .env.example .env
-# Edit .env to customize Ollama host, model, or safety settings
+# Edit .env if you wish to adjust Ollama settings, ports, or allowed services
 ```
 
-### 4. Launch LinuxPilot AI
+### 4. Start LinuxPilot AI
 
 ```bash
 ./scripts/start.sh
 ```
 
-| Service | URL |
-|---|---|
-| ðŸ–¥ï¸ Dashboard UI | http://localhost:1420 |
-| ðŸ”Œ Backend API | http://127.0.0.1:8000 |
-| ðŸ“š Swagger Docs | http://127.0.0.1:8000/docs |
+Once started, the following services will be available:
 
-### 5. Management Commands
+| Service | Address |
+|---|---|
+| **Dashboard UI** | [http://localhost:1420](http://localhost:1420) |
+| **Backend API** | [http://127.0.0.1:8000](http://127.0.0.1:8000) |
+| **Interactive Swagger Docs** | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
+
+### 5. Service Management
 
 ```bash
-./scripts/status.sh   # Check service health
-./scripts/stop.sh     # Stop all services cleanly
+# Check service health and PID status
+./scripts/status.sh
+
+# Stop all background services cleanly
+./scripts/stop.sh
 ```
 
 ---
 
-## ðŸªŸ Windows (Development & Testing)
+## Windows Development & Testing
 
-LinuxPilot AI supports Windows for dashboard development and testing. Linux-native integrations (`systemctl`, `journalctl`) return structured status messages on Windows.
+LinuxPilot AI supports Windows for frontend dashboard development and backend testing. Linux-native operations (`systemctl`, `journalctl`) return structured mock or status responses when running on Windows.
+
+### Terminal 1: Backend
 
 ```powershell
-# Terminal 1 â€” Backend
+# Create and activate virtual environment
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install -r backend/requirements.txt
-uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 
-# Terminal 2 â€” Frontend
+# Install requirements
+pip install -r backend/requirements.txt
+
+# Start the FastAPI server
+uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+### Terminal 2: Frontend
+
+```powershell
 cd frontend
 npm install
 npm run dev
@@ -209,104 +213,109 @@ npm run dev
 
 ---
 
-## ðŸ“ Project Structure
+## Project Directory Structure
 
-```
+```text
 LinuxPilot-Ai/
-â”œâ”€â”€ backend/                    # FastAPI Python backend
-â”‚   â”œâ”€â”€ ai/                     # Intent classifier, Ollama client, prompts
-â”‚   â”œâ”€â”€ agent/                  # Orchestrator & planner
-â”‚   â”œâ”€â”€ api/                    # Route handlers (agent, diagnostics, services, logs, etc.)
-â”‚   â”œâ”€â”€ commands/               # Command execution & safety validator
-â”‚   â”œâ”€â”€ database/               # SQLite schema & session management
-â”‚   â”œâ”€â”€ diagnostics/            # CPU, memory, disk, network tools
-â”‚   â”œâ”€â”€ search/                 # High-speed file search engine
-â”‚   â”œâ”€â”€ services/               # Systemd service manager
-â”‚   â”œâ”€â”€ utils/                  # Config, logger, helpers
-â”‚   â”œâ”€â”€ validator/              # 3-tier command safety layer
-â”‚   â””â”€â”€ main.py                 # FastAPI application entrypoint
-â”œâ”€â”€ frontend/                   # React 18 + TypeScript + Vite + Tailwind UI
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ components/         # UI components (dashboard, chat, metrics)
-â”‚   â”‚   â”œâ”€â”€ hooks/              # Custom React hooks
-â”‚   â”‚   â””â”€â”€ services/           # API client services
-â”‚   â””â”€â”€ src-tauri/              # Tauri desktop app wrapper (optional)
-â”œâ”€â”€ tests/                      # 55 automated pytest tests
-â”œâ”€â”€ scripts/                    # install.sh, start.sh, stop.sh, status.sh
-â”œâ”€â”€ docker/                     # Docker configuration
-â”œâ”€â”€ docker-compose.yml          # Multi-container orchestration
-â”œâ”€â”€ .env.example                # Environment variable template
-â””â”€â”€ requirements.txt            # Python dependencies
+|-- backend/                    # FastAPI backend
+|   |-- agent/                  # Orchestrator and task planner
+|   |-- ai/                     # Intent classifier, Ollama client, prompt templates
+|   |-- api/                    # REST route endpoints (agent, diagnostics, logs, search)
+|   |-- commands/               # Command execution and safe subprocess runner
+|   |-- database/               # SQLite database models and session helpers
+|   |-- diagnostics/            # CPU, memory, disk, and network collectors
+|   |-- search/                 # Filesystem search engine (os.scandir)
+|   |-- services/               # Systemd service manager
+|   |-- utils/                  # Logger, configuration, and helpers
+|   |-- validator/              # 3-tier command safety engine
+|   \-- main.py                 # FastAPI application entry point
+|-- frontend/                   # React 18 + TypeScript + Vite + Tailwind CSS
+|   |-- src/
+|   |   |-- components/         # UI components (dashboard, metrics, chat, logs)
+|   |   |-- hooks/              # Custom React hooks
+|   |   \-- services/           # Backend API communication clients
+|   \-- src-tauri/              # Optional Tauri desktop shell
+|-- tests/                      # Pytest automated test suite (55 tests)
+|-- scripts/                    # install.sh, start.sh, stop.sh, status.sh
+|-- docker/                     # Dockerfiles for containerized environments
+|-- docker-compose.yml          # Container configuration
+|-- requirements.txt            # Python dependencies
+\-- .env.example                # Environment configuration template
 ```
 
 ---
 
-## ðŸ“¡ API Reference
+## API Reference
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/health` | `GET` | Health check and environment configuration |
-| `/api/agent/ask` | `POST` | Full pipeline: classify â†’ plan â†’ execute â†’ synthesize |
-| `/api/agent/history` | `GET` | Recent interaction history from SQLite |
-| `/api/intent/classify` | `POST` | Intent detection & parameter extraction |
-| `/api/diagnostics/cpu` | `GET` | Real-time CPU usage, core breakdown, load average |
-| `/api/diagnostics/memory` | `GET` | RAM and swap utilization |
-| `/api/diagnostics/disk` | `GET` | Mount point capacity & usage |
-| `/api/diagnostics/network` | `GET` | Gateway, DNS, IP, and connectivity status |
-| `/api/services/{name}/status` | `GET` | Inspect systemd service status |
-| `/api/services/{name}/restart` | `POST` | Restart service (requires user confirmation) |
-| `/api/logs/journalctl` | `POST` | Safe parameterized journalctl query |
-| `/api/logs/dmesg` | `POST` | Parameterized kernel dmesg query |
-| `/api/search/files` | `POST` | Fast filesystem search by name, category, size |
-| `/api/execute/command` | `POST` | Validate & run command via 3-tier safety layer |
+| `/api/health` | `GET` | Health check and active configuration status |
+| `/api/agent/ask` | `POST` | Primary agent endpoint: classify -> plan -> execute -> synthesize |
+| `/api/agent/history` | `GET` | Retrieve recent interaction history from SQLite |
+| `/api/intent/classify` | `POST` | Run intent classification and parameter extraction |
+| `/api/diagnostics/cpu` | `GET` | Real-time CPU usage, per-core stats, and load averages |
+| `/api/diagnostics/memory` | `GET` | Total, available, and used RAM plus swap space |
+| `/api/diagnostics/disk` | `GET` | Mount points, total storage, used percentage |
+| `/api/diagnostics/network` | `GET` | Default gateway, IP addresses, DNS, and connection test |
+| `/api/services/{name}/status` | `GET` | Check systemd service status (e.g. nginx, docker) |
+| `/api/services/{name}/restart`| `POST`| Restart a service (triggers confirmation check) |
+| `/api/logs/journalctl` | `POST` | Query system logs with safety-checked parameters |
+| `/api/logs/dmesg` | `POST` | Inspect kernel ring buffer logs safely |
+| `/api/search/files` | `POST` | Search files by name pattern, size threshold, and path |
+| `/api/execute/command` | `POST` | Validate and execute a shell command through safety checks |
 
-> **Interactive Swagger UI** available at `http://127.0.0.1:8000/docs` when the backend is running.
+Interactive API documentation and schema testing are available at `http://127.0.0.1:8000/docs`.
 
 ---
 
-## ðŸ§ª Running Tests
+## Running Tests
+
+LinuxPilot AI includes a comprehensive test suite covering all critical modules:
 
 ```bash
-# From project root â€” runs all 55 tests
+# Run the complete test suite
 python -m pytest -v
 ```
 
-```
-tests/test_api.py                 (9 tests)  âœ… PASSED
-tests/test_command_safety.py      (4 tests)  âœ… PASSED
-tests/test_command_validator.py  (13 tests)  âœ… PASSED
-tests/test_intent_classifier.py   (7 tests)  âœ… PASSED
-tests/test_orchestrator.py        (9 tests)  âœ… PASSED
-tests/test_planner.py             (6 tests)  âœ… PASSED
-tests/test_tools.py               (7 tests)  âœ… PASSED
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-55 passed in 2.72s
+### Test Suite Summary
+
+```text
+tests/test_api.py                 (9 tests)   PASSED
+tests/test_command_safety.py      (4 tests)   PASSED
+tests/test_command_validator.py  (13 tests)   PASSED
+tests/test_intent_classifier.py   (7 tests)   PASSED
+tests/test_orchestrator.py        (9 tests)   PASSED
+tests/test_planner.py             (6 tests)   PASSED
+tests/test_tools.py               (7 tests)   PASSED
+============================= 55 passed in ~3s =============================
 ```
 
 ---
 
-## ðŸ³ Docker Support
+## Docker Support
+
+Run LinuxPilot AI in an isolated container environment using Docker Compose:
 
 ```bash
-# Launch full stack with Docker Compose
+# Build and run the complete stack
 docker-compose up --build
 
-# Run backend only
+# Run only the backend service
 docker-compose up backend
 ```
 
 ---
 
-## âš™ï¸ Environment Configuration
+## Environment Configuration
 
-Copy `.env.example` to `.env` and configure:
+Copy `.env.example` to create your local `.env` file:
 
-```env
-# AI / Ollama
+```ini
+# AI / Ollama Configuration
 OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=qwen2.5:7b-instruct
 
-# Application
+# Application Settings
 APP_ENV=development
 LOG_LEVEL=INFO
 API_HOST=127.0.0.1
@@ -315,69 +324,63 @@ API_PORT=8000
 # Database
 DATABASE_URL=sqlite:///./linuxpilot.db
 
-# Safety (read carefully before enabling!)
+# Command Execution Safety Settings
 ALLOW_COMMAND_EXECUTION=false
 ALLOWED_SERVICES=docker,apache2,nginx,ssh,mysql,postgresql
 COMMAND_TIMEOUT_SECONDS=20
 ```
 
-> **âš ï¸ Warning:** Keep `ALLOW_COMMAND_EXECUTION=false` until you have reviewed the command validation layer and understand its behavior.
+> **Security Note:** Keep `ALLOW_COMMAND_EXECUTION=false` during initial setup until you are ready to allow the agent to execute modifying commands on your host system.
 
 ---
 
-## ðŸŽ¯ Demo Walkthrough
+## Demo Queries
 
-Try these queries in the dashboard for a rapid feature tour:
+Try these sample queries in the dashboard to explore LinuxPilot AI's capabilities:
 
-1. **âš¡ Live Diagnostics** â€” `"Why is my computer running slowly?"` â†’ real-time CPU, RAM, disk in ~500 ms
-2. **ðŸ” File Search** â€” `"Find all large files in my home directory"` â†’ files >100 MB ranked in ~70 ms
-3. **ðŸ Filtered Search** â€” `"Find Python files larger than 50 MB"` â†’ parameter extraction demo
-4. **âš ï¸ Modifying Command** â€” `"Restart nginx"` â†’ watch the confirmation gate in action
-5. **ðŸš« Safety Block** â€” `"rm -rf /"` â†’ immediate `<2 ms` blocked response
-6. **ðŸ’¡ Concept Tutor** â€” `"Explain chmod 755"` â†’ instant permission breakdown table
+1. **System Health Check**: `"Why is my computer running slowly?"`
+   - *Result*: Runs instant diagnostics across CPU, RAM, and disk in under 500 ms.
+2. **Find Large Files**: `"Find all large files in my home directory"`
+   - *Result*: Scans your home directory and returns files over 100 MB in ~70 ms.
+3. **Targeted Search**: `"Find Python files larger than 50 MB"`
+   - *Result*: Extracts file type and size parameters and returns matching files.
+4. **Service Control**: `"Restart nginx"`
+   - *Result*: Triggers the user confirmation gate before taking any modifying action.
+5. **Safety Block Demo**: `"rm -rf /"`
+   - *Result*: Instantly intercepted and permanently blocked with a clear warning.
+6. **Concept Explanation**: `"Explain what chmod 755 means"`
+   - *Result*: Provides a clear, detailed breakdown of user, group, and other permissions.
 
 ---
 
-## ðŸ§° Tech Stack
+## Tech Stack
 
-| Layer | Technology |
+| Category | Technologies |
 |---|---|
 | **Backend** | Python 3.10+, FastAPI 0.115, Uvicorn, Pydantic v2 |
-| **AI / LLM** | Ollama + Qwen 2.5:7B-Instruct (local, offline-capable) |
-| **System Tools** | psutil, os.scandir, systemctl, journalctl, dmesg |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS |
-| **Desktop** | Tauri (optional cross-platform wrapper) |
-| **Database** | SQLite (interaction history) |
-| **Testing** | pytest, pytest-asyncio |
-| **DevOps** | Docker, Docker Compose |
+| **AI & LLM** | Ollama, Qwen 2.5:7B-Instruct (local execution) |
+| **System Diagnostics** | psutil, os.scandir, systemctl, journalctl, dmesg |
+| **Frontend UI** | React 18, TypeScript, Vite, Tailwind CSS |
+| **Desktop Integration** | Tauri (optional desktop app build) |
+| **Database** | SQLite (conversation and execution history) |
+| **Testing** | Pytest, pytest-asyncio (55 automated tests) |
+| **Deployment** | Shell scripts (`scripts/`), Docker, Docker Compose |
 
 ---
 
-## ðŸ¤ Contributing
+## Contributing
 
-Contributions are welcome! Please:
+Contributions and feedback are welcome! To contribute:
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'feat: add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-Please ensure all 55 tests pass before submitting a PR: `python -m pytest -v`
-
----
-
-## ðŸ“„ License
-
-This project is licensed under the **MIT License** â€” see the [LICENSE](LICENSE) file for details.
+1. Fork the repository on GitHub.
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m "feat: add my new feature"`
+4. Push to your branch: `git push origin feature/my-feature`
+5. Ensure all tests pass: `python -m pytest -v`
+6. Open a Pull Request.
 
 ---
 
-<div align="center">
+## License
 
-**Built with â¤ï¸ for the Linux community**
-
-*LinuxPilot AI â€” Intelligent. Safe. Fast.*
-
-</div>
-
+This project is licensed under the [MIT License](LICENSE).
